@@ -1,8 +1,7 @@
 from typing import List
 import ast
-import textwrap
 import inspect
-from micro_thread import _Empty, Function, MicroThreadCreator
+from micro_task import _Empty, Function, MicroTaskCreator
 
 
 class YieldInjector(ast.NodeTransformer):
@@ -20,6 +19,9 @@ class YieldInjector(ast.NodeTransformer):
                     new_body[-1] = ast.Expr(ast.Yield(value=stmt.value))
                 continue
 
+            if isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call):
+                print(ast.dump(stmt))
+
             for attribute in ("body", "orelse"):
                 if hasattr(stmt, attribute):
                     setattr(stmt, attribute, self._inject(getattr(stmt, attribute)))
@@ -35,7 +37,7 @@ class YieldInjector(ast.NodeTransformer):
         return new_body
 
 
-def inject(func: Function) -> MicroThreadCreator:
+def inject(func: Function) -> MicroTaskCreator:
     # Stripping decorators for ast.parse to work
     func.__globals__[func.__name__] = func
     source_lines = inspect.getsource(func).splitlines()
@@ -47,8 +49,6 @@ def inject(func: Function) -> MicroThreadCreator:
     transformed_tree = transformer.visit(tree)
     ast.fix_missing_locations(transformed_tree)
 
-    print(ast.unparse(transformed_tree))
-    print("-" * 40)
     code = compile(transformed_tree, filename="<ast>", mode="exec")
     func_globals = func.__globals__.copy()
 

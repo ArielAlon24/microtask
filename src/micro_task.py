@@ -11,5 +11,5 @@ R = TypeVar("R")
 
 
 Function = Callable[P, R]
-MicroThread = Generator[_Empty | R, None, None]
-MicroThreadCreator = Callable[P, MicroThread]
+MicroTask = Generator[_Empty | R, None, None]
+MicroTaskCreator = Callable[P, MicroTask]

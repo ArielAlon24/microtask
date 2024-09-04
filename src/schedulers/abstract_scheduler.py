@@ -1,14 +1,14 @@
 from abc import ABC, abstractmethod
 
-from micro_thread import MicroThread
+from micro_task import MicroTask
 
 
 class AbstractScheduler(ABC):
 
     @abstractmethod
-    def add(self, micro_thread: MicroThread) -> None:
+    def add(self, micro_task: MicroTask) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def run(self) -> None:
+    def start(self) -> None:
         pass

@@ -1,15 +1,19 @@
-from schedulers.round_robin import RoundRobin
-from yield_injector import inject
+import commands
+from schedulers import RoundRobin
+from yield_injector import inject as microtask
 
 
-@inject
+scheduler = RoundRobin(0.001)
+
+
+@microtask
 def loop(message: str):
+    yield commands.sleep(10)
     while True:
         print(message)
 
 
-scheduler = RoundRobin(1)
 scheduler.add(loop("foo"))
 scheduler.add(loop("bar"))
 
-scheduler.run()
+scheduler.start()g
