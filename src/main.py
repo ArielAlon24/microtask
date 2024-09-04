@@ -16,4 +16,4 @@ def loop(message: str):
 scheduler.add(loop("foo"))
 scheduler.add(loop("bar"))
 
-scheduler.start()g
+scheduler.start()
