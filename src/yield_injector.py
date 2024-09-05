@@ -34,7 +34,7 @@ class YieldInjector(ast.NodeTransformer):
         return new_body
 
 
-def inject(func: Function) -> MicroTaskCreator:
+def inject(func: Function, debug: bool = True) -> MicroTaskCreator:
     # Stripping decorators for ast.parse to work
     func.__globals__[func.__name__] = func
     source_lines = inspect.getsource(func).splitlines()
@@ -43,13 +43,15 @@ def inject(func: Function) -> MicroTaskCreator:
     tree = ast.parse(source_code)
 
     transformer = YieldInjector()
-    transformed_tree = transformer.visit(tree)
-    ast.fix_missing_locations(transformed_tree)
+    transformed_ast = transformer.visit(tree)
+    ast.fix_missing_locations(transformed_ast)
 
-    print(ast.unparse(transformed_tree))
-    print("-" * 50)
+    if debug:
+        print(f"----- {func.__name__} transformed ast -----")
+        print(ast.unparse(transformed_ast))
+        print()
 
-    code = compile(transformed_tree, filename="<ast>", mode="exec")
+    code = compile(transformed_ast, filename="<ast>", mode="exec")
     func_globals = func.__globals__.copy()
 
     func_globals[_Empty.__name__] = _Empty
