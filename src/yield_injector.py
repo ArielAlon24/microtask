@@ -19,9 +19,6 @@ class YieldInjector(ast.NodeTransformer):
                     new_body[-1] = ast.Expr(ast.Yield(value=stmt.value))
                 continue
 
-            if isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call):
-                print(ast.dump(stmt))
-
             for attribute in ("body", "orelse"):
                 if hasattr(stmt, attribute):
                     setattr(stmt, attribute, self._inject(getattr(stmt, attribute)))

@@ -1,65 +1,54 @@
 import time
-
+from typing import Any
 from commands import AbstractCommand
 import commands
-
 from .abstract_scheduler import AbstractScheduler
-from micro_task import MicroTask, _Empty
-
-from dataclasses import dataclass, field
-from typing import List
-
-
-@dataclass(slots=True)
-class Task:
-    micro_task: MicroTask
-    command: AbstractCommand | None = field(default=None)
+from micro_task import MicroTask, _Empty, MicroTaskGen, Future
 
 
 class RoundRobin(AbstractScheduler):
     def __init__(self, quantum: float) -> None:
         self.quantum = quantum
-        self.tasks = []
+        self.micro_tasks = []
         self.index = -1
 
-    def add(self, micro_task: MicroTask) -> None:
-        return self.tasks.append(Task(micro_task))
+    def add(self, generator: MicroTaskGen) -> Future:
+        micro_task = MicroTask(generator)
+        self.micro_tasks.append(micro_task)
+        return micro_task._future
+
+    def wait(self, future: Future) -> Any:
+        pass
 
     def start(self) -> None:
-        while len(self.tasks) != 0:
-            task = self.get_next_task()
-
+        while len(self.micro_tasks) != 0:
+            task = self._select_next_micro_task()
             start_time = time.perf_counter()
 
             while time.perf_counter() - start_time < self.quantum:
                 try:
-                    result = next(task.micro_task)
+                    result = next(task._generator)
 
                     if isinstance(result, AbstractCommand):
-                        task.command = result
+                        task._command = result
                         break
 
                     elif result != _Empty:
+                        task._future._value = result  # type: ignore
                         raise StopIteration
 
                 except StopIteration:
-                    self.tasks.remove(task)
+                    self.micro_tasks.remove(task)
                     break
 
-                current_time = time.perf_counter()
-
-    def get_next_task(self) -> Task:
+    def _select_next_micro_task(self) -> MicroTask:
         while True:
-            self.index = (self.index + 1) % len(self.tasks)
-            task = self.tasks[self.index]
+            self.index = (self.index + 1) % len(self.micro_tasks)
+            micro_task = self.micro_tasks[self.index]
 
-            if task.command is None:
-                return task
+            if micro_task._command is None:
+                return micro_task
 
-            if isinstance(task.command, commands.Sleep):
-                if task.command.is_done():
-                    return task
-
-    def handle_command(self, command: AbstractCommand) -> None:
-        if isinstance(command, commands.Sleep):
-            pass
+            if isinstance(micro_task._command, commands.Sleep):
+                if micro_task._command.is_done():
+                    return micro_task

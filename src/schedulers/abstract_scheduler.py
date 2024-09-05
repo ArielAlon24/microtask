@@ -1,14 +1,14 @@
 from abc import ABC, abstractmethod
 
-from micro_task import MicroTask
+from micro_task import Future, MicroTaskGen
 
 
 class AbstractScheduler(ABC):
 
     @abstractmethod
-    def add(self, micro_task: MicroTask) -> None:
+    def add(self, generator: MicroTaskGen) -> Future:
         raise NotImplementedError
 
     @abstractmethod
     def start(self) -> None:
-        pass
+        raise NotImplementedError
