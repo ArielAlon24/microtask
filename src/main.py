@@ -3,23 +3,28 @@ import commands
 from schedulers import RoundRobin
 from yield_injector import inject as microtask
 
-scheduler = RoundRobin(0.001)
+scheduler = RoundRobin(0.0001)
 
 
 @microtask
 def loop(message: str):
-    yield commands.sleep(1)
-    for _ in range(100):
+    for _ in range(10):
+        yield commands.sleep(0.1)
         print(message)
+        ...
     return f"boom {message}"
 
 
 @microtask
-def main() -> None:
-    future = scheduler.add(loop("foo"))
+def main():
+    future1 = scheduler.add(loop("foo"))
+    future2 = scheduler.add(loop("bar"))
 
-    a = scheduler.wait(future)
-    print(a)
+    a = yield commands.wait(future1)
+    print(f"future1 is: {a}")
+
+    b = yield commands.wait(future2)
+    print(f"future2 is: {b}")
 
 
 if __name__ == "__main__":

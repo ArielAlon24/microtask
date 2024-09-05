@@ -18,7 +18,10 @@ class RoundRobin(AbstractScheduler):
         return micro_task._future
 
     def wait(self, future: Future) -> Any:
-        pass
+        while not future.is_done:
+            print("inside")
+            self.start()
+        return future._value
 
     def start(self) -> None:
         while len(self.micro_tasks) != 0:
@@ -51,4 +54,9 @@ class RoundRobin(AbstractScheduler):
 
             if isinstance(micro_task._command, commands.Sleep):
                 if micro_task._command.is_done():
+                    return micro_task
+
+            if isinstance(micro_task._command, commands.Wait):
+                if micro_task._command.is_done():
+                    micro_task._generator.send(micro_task._command.future._value)
                     return micro_task

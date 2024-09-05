@@ -46,6 +46,9 @@ def inject(func: Function) -> MicroTaskCreator:
     transformed_tree = transformer.visit(tree)
     ast.fix_missing_locations(transformed_tree)
 
+    print(ast.unparse(transformed_tree))
+    print("-" * 50)
+
     code = compile(transformed_tree, filename="<ast>", mode="exec")
     func_globals = func.__globals__.copy()
 

@@ -25,6 +25,10 @@ MicroTaskGen = Generator[_Empty | R, None, None]
 class Future(Generic[R]):
     _value: R | _Undefined = field(default_factory=_Undefined)
 
+    @property
+    def is_done(self) -> bool:
+        return not isinstance(self._value, _Undefined)
+
 
 @dataclass(slots=True)
 class MicroTask(Generic[R]):
