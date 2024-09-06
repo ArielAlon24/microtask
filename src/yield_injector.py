@@ -1,7 +1,7 @@
 from typing import List
 import ast
 import inspect
-from micro_task import _Empty, Function, MicroTaskCreator
+from .models.micro_task import Function, _Empty, MicroTaskGenCreator
 
 
 class YieldInjector(ast.NodeTransformer):
@@ -12,6 +12,10 @@ class YieldInjector(ast.NodeTransformer):
     def _inject(self, body: List[ast.stmt]) -> List[ast.stmt]:
         new_body = []
         for stmt in body:
+            if isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Yield):
+                new_body.append(stmt)
+                continue
+
             if isinstance(stmt, ast.Return):
                 if len(new_body) == 0:
                     new_body.append(ast.Expr(ast.Yield(value=stmt.value)))
@@ -34,7 +38,7 @@ class YieldInjector(ast.NodeTransformer):
         return new_body
 
 
-def inject(func: Function, debug: bool = True) -> MicroTaskCreator:
+def inject(func: Function, debug: bool = True) -> MicroTaskGenCreator:
     # Stripping decorators for ast.parse to work
     func.__globals__[func.__name__] = func
     source_lines = inspect.getsource(func).splitlines()
