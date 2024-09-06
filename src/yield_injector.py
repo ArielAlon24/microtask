@@ -12,6 +12,10 @@ class YieldInjector(ast.NodeTransformer):
     def _inject(self, body: List[ast.stmt]) -> List[ast.stmt]:
         new_body = []
         for stmt in body:
+            if isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Yield):
+                new_body.append(stmt)
+                continue
+
             if isinstance(stmt, ast.Return):
                 if len(new_body) == 0:
                     new_body.append(ast.Expr(ast.Yield(value=stmt.value)))
