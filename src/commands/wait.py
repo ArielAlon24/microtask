@@ -1,11 +1,19 @@
+from typing import Generic, TypeVar
 from .abstract_command import AbstractCommand
-from dataclasses import dataclass, field
-from micro_task import Future
+from dataclasses import dataclass
+from micro_task import Future, _Undefined
+
+T = TypeVar("T")
 
 
 @dataclass
-class Wait(AbstractCommand):
-    future: Future
+class Wait(Generic[T], AbstractCommand[T]):
+    future: Future[T]
 
     def is_done(self) -> bool:
-        return self.future.is_done
+        return self.future.is_done()
+
+    def result(self) -> T:
+        if isinstance(self.future._value, _Undefined):
+            raise RuntimeError(f"Future result was {_Undefined.__name__}")
+        return self.future._value

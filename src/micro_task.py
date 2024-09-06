@@ -25,7 +25,6 @@ MicroTaskGen = Generator[_Empty | R, None, None]
 class Future(Generic[R]):
     _value: R | _Undefined = field(default_factory=_Undefined)
 
-    @property
     def is_done(self) -> bool:
         return not isinstance(self._value, _Undefined)
 
@@ -37,4 +36,4 @@ class MicroTask(Generic[R]):
     _future: Future[R] = field(default_factory=Future)
 
 
-MicroTaskCreator = Callable[P, MicroTaskGen]
+MicroTaskGenCreator = Callable[P, MicroTaskGen]

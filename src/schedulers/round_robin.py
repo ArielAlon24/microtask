@@ -1,7 +1,6 @@
 import time
 from typing import Any, Callable
 from commands import AbstractCommand
-import commands
 from yield_injector import inject
 from .abstract_scheduler import AbstractScheduler
 from micro_task import Function, MicroTask, _Empty, MicroTaskGen, Future
@@ -13,7 +12,7 @@ class RoundRobin(AbstractScheduler):
         self.micro_tasks = []
         self.index = -1
 
-    def __call__(self, function: Function, *args: Any, **kwds: Any) -> Any:
+    def __call__(self, function: Function) -> Callable[..., Future]:
         generator_creator = inject(function)
 
         def wrapper(*args: Any, **kwargs: Any) -> Future:
@@ -42,7 +41,7 @@ class RoundRobin(AbstractScheduler):
                         break
 
                     elif result != _Empty:
-                        task._future._value = result  # type: ignore
+                        task._future._value = result
                         raise StopIteration
 
                 except StopIteration:
@@ -57,11 +56,6 @@ class RoundRobin(AbstractScheduler):
             if micro_task._command is None:
                 return micro_task
 
-            if isinstance(micro_task._command, commands.Sleep):
-                if micro_task._command.is_done():
-                    return micro_task
-
-            if isinstance(micro_task._command, commands.Wait):
-                if micro_task._command.is_done():
-                    micro_task._generator.send(micro_task._command.future._value)
-                    return micro_task
+            if micro_task._command.is_done():
+                micro_task._generator.send(micro_task._command.result())
+                return micro_task

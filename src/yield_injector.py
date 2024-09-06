@@ -1,7 +1,7 @@
 from typing import List
 import ast
 import inspect
-from micro_task import _Empty, Function, MicroTaskCreator
+from micro_task import _Empty, Function, MicroTaskGenCreator
 
 
 class YieldInjector(ast.NodeTransformer):
@@ -38,7 +38,7 @@ class YieldInjector(ast.NodeTransformer):
         return new_body
 
 
-def inject(func: Function, debug: bool = True) -> MicroTaskCreator:
+def inject(func: Function, debug: bool = True) -> MicroTaskGenCreator:
     # Stripping decorators for ast.parse to work
     func.__globals__[func.__name__] = func
     source_lines = inspect.getsource(func).splitlines()
