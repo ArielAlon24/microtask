@@ -1,7 +1,7 @@
 from typing import List
 import ast
 import inspect
-from micro_task import _Empty, Function, MicroTaskGenCreator
+from .models.micro_task import Function, _Empty, MicroTaskGenCreator
 
 
 class YieldInjector(ast.NodeTransformer):

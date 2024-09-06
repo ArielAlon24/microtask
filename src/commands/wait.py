@@ -1,14 +1,14 @@
 from typing import Generic, TypeVar
 from .abstract_command import AbstractCommand
 from dataclasses import dataclass
-from micro_task import Future, _Undefined
+from ..models.future import _Future, _Undefined
 
 T = TypeVar("T")
 
 
 @dataclass
 class Wait(Generic[T], AbstractCommand[T]):
-    future: Future[T]
+    future: _Future[T]
 
     def is_done(self) -> bool:
         return self.future.is_done()
