@@ -18,11 +18,11 @@ def main() -> Future[None]:
     future1 = loop("foo")
     future2 = loop("bar")
 
-    b = yield wait(future2)
-    print(f"future2 is: {b}")
-
     a = yield wait(future1)
     print(f"future1 is: {a}")
+
+    b = yield wait(future2)
+    print(f"future2 is: {b}")
 
 
 if __name__ == "__main__":
