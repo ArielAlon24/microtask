@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar
+from typing import TypeVar
 from .abstract_command import AbstractCommand
 from dataclasses import dataclass
 from ..models.future import _Future, _Undefined
@@ -7,7 +7,7 @@ T = TypeVar("T")
 
 
 @dataclass
-class Wait(Generic[T], AbstractCommand[T]):
+class Wait(AbstractCommand[T]):
     future: _Future[T]
 
     def is_done(self) -> bool:
