@@ -4,7 +4,7 @@ A dumb way to create asynchronous tasks in Python.
 
 ## How microtask works?
 
-microtask takes each function decorated with a scheduler and edits it runtime - it adds yield statements one after each line. For example the function
+microtask takes each function decorated with a scheduler and edits it at runtime by adding yield statements after each line of code. For example the function
 
 ```python
 @scheduler
@@ -13,7 +13,6 @@ def test() -> Future[int]:
     a += 2
     return 12
 ```
-
 will turn into
 ```python
 def test() -> Generator[Future]:
